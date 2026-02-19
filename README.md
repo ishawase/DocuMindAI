@@ -12,7 +12,7 @@
 
 DocuMindAI is a Retrieval-Augmented Generation (RAG) system that allows users to interact with their documents using natural language. The system retrieves relevant sections from a PDF file and generates context-grounded answers using a local Large Language Model.
 
-This project demonstrates core AI concepts used in modern LLM applications.
+This project demonstrates core AI concepts used in modern LLM applications and has been containerized using Docker for consistent and reproducible deployment.
 
 ---
 
@@ -29,7 +29,8 @@ Document → Chunking → Embeddings → Vector Database → Retrieval → LLM �
 - Semantic embeddings using Sentence Transformers  
 - Vector similarity search with FAISS  
 - Local LLM (FLAN-T5) for grounded responses  
-- Reduced hallucination via context-based prompting  
+- Reduced hallucination via context-based prompting
+- Containerized deployment using Docker
 
 ---
 
@@ -41,13 +42,21 @@ Document → Chunking → Embeddings → Vector Database → Retrieval → LLM �
 | Embeddings | Sentence Transformers (all-MiniLM-L6-v2) |
 | Vector Database | FAISS |
 | Framework | LangChain Community Modules |
+| Containerization | Docker |
 | Language | Python |
 
 ---
 
-## Installation
+## Dockerized Deployment
 
-Install dependencies:
+Build Docker Image:
 
 ```bash
-pip install langchain-community langchain-core langchain-text-splitters sentence-transformers transformers faiss-cpu pypdf
+docker build -t documind-ai .
+```
+
+Run Docker Container:
+
+```bash
+docker run -it documind-ai
+```
