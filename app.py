@@ -37,9 +37,13 @@ while True:
     if query.lower() == "exit":
         break
 
-    docs = db.similarity_search(query, k=3)
-    context = "\n".join([doc.page_content for doc in docs])
+    docs_and_scores = db.similarity_search_with_score(query, k=3)
+    if docs_and_scores[0][1] > 1.2: 
+        print("\nAnswer: Sorry, this question is outside the document's knowledge.")
+        continue
 
+    results = [doc for doc, score in docs_and_scores]
+    context = "\n".join([doc.page_content for doc in results])
     prompt = f"""Answer the question using only the context below.
 
 Context:
