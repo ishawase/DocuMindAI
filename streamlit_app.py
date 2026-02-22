@@ -4,15 +4,23 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from huggingface_hub import InferenceClient
 
-# AWS S3 Config
+# ---------------- AWS S3 CONFIG ---------------- #
+
 bucket_name = "documindai-bucket-isha"
-
 s3 = boto3.client("s3")
 
-st.title("📄 DocuMind AI")
+# ---------------- HF API CONFIG ---------------- #
 
+client = InferenceClient(
+    model="google/flan-t5-small",
+    token="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"   
+)
+
+# ---------------- UI ---------------- #
+
+st.title("📄 DocuMind AI")
 uploaded_file = st.file_uploader("Upload your PDF", type="pdf")
 
 if uploaded_file:
@@ -23,12 +31,12 @@ if uploaded_file:
     with open(file_name, "wb") as f:
         f.write(uploaded_file.read())
 
-    # Upload to S3 using actual file name
+    # Upload to S3
     s3.upload_file(file_name, bucket_name, file_name)
-
     st.success(f"{file_name} uploaded to S3 successfully!")
 
-    # RAG Processing
+    # ----------- RAG PIPELINE ----------- #
+
     loader = PyPDFLoader(file_name)
     documents = loader.load()
 
@@ -46,6 +54,7 @@ if uploaded_file:
     question = st.text_input("Ask a question:")
 
     if question:
+
         results = db.similarity_search(question, k=3)
         context = "\n".join([d.page_content for d in results])
 
@@ -59,21 +68,10 @@ if uploaded_file:
         Answer:
         """
 
-        model_name = "google/flan-t5-small"
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-
-        inputs = tokenizer(prompt, return_tensors="pt", truncation=True)
-
-        outputs = model.generate(
-            **inputs,
+        response = client.text_generation(
+            prompt,
             max_new_tokens=200
         )
 
-        answer = tokenizer.decode(outputs[0], skip_special_tokens=True)
-
         st.subheader("Answer")
-
-        st.write(answer)
-
-
+        st.write(response)
