@@ -1,8 +1,10 @@
-﻿langchain-community
+streamlit
+boto3
+langchain-community
 langchain-core
 langchain-text-splitters
 sentence-transformers
-transformers
 faiss-cpu
 pypdf
-huggingface_hub
+requests
+
