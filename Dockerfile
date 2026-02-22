@@ -11,4 +11,6 @@ RUN pip install --default-timeout=1000 \
 
 RUN pip install --default-timeout=1000 -r requirements.txt
 
-CMD ["python", "app.py"]
+EXPOSE 8501
+
+CMD ["streamlit", "run", "streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
