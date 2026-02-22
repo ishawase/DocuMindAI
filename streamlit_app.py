@@ -17,14 +17,16 @@ uploaded_file = st.file_uploader("Upload your PDF", type="pdf")
 
 if uploaded_file:
 
+    file_name = uploaded_file.name
+
     # Save locally
-    with open("temp.pdf", "wb") as f:
+    with open(file_name, "wb") as f:
         f.write(uploaded_file.read())
 
-    # Upload to S3
-    s3.upload_file("temp.pdf", bucket_name, "temp.pdf")
+    # Upload to S3 using actual file name
+    s3.upload_file(file_name, bucket_name, file_name)
 
-    st.success("Uploaded to S3 Successfully!")
+    st.success(f"{file_name} uploaded to S3 successfully!")
 
     # RAG Processing
     loader = PyPDFLoader("temp.pdf")
@@ -71,4 +73,5 @@ if uploaded_file:
         answer = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
         st.subheader("Answer")
+
         st.write(answer)
