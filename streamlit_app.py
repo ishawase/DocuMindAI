@@ -73,7 +73,7 @@ Answer:
 """
 
         try:
-            answer = client.text2text_generation(
+            answer = client.text_generation(
                 prompt,
                 max_new_tokens=200
             )
@@ -82,3 +82,4 @@ Answer:
 
         st.subheader("Answer")
         st.write(answer)
+
