@@ -17,8 +17,7 @@ s3 = boto3.client("s3")
 
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-small"
-
+API_URL = "https://router.huggingface.co/hf-inference/models/google/flan-t5-small"
 headers = {
     "Authorization": f"Bearer {HF_TOKEN}"
 }
@@ -93,4 +92,5 @@ Answer:
 
         st.subheader("Answer")
         st.write(answer)
+
 
