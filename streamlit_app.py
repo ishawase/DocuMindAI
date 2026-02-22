@@ -29,7 +29,7 @@ if uploaded_file:
     st.success(f"{file_name} uploaded to S3 successfully!")
 
     # RAG Processing
-    loader = PyPDFLoader("temp.pdf")
+    loader = PyPDFLoader(file_name)
     documents = loader.load()
 
     splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=50)
@@ -75,3 +75,4 @@ if uploaded_file:
         st.subheader("Answer")
 
         st.write(answer)
+
