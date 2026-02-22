@@ -15,7 +15,7 @@ s3 = boto3.client("s3")
 
 client = InferenceClient(
     model="google/flan-t5-small",
-    token="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"   
+    token="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"   
 )
 
 # ---------------- UI ---------------- #
@@ -75,4 +75,5 @@ if uploaded_file:
 
         st.subheader("Answer")
         st.write(response)
+
 
