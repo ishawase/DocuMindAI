@@ -1,27 +1,36 @@
-import os
 import streamlit as st
 import boto3
+import os
+import requests
+
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from huggingface_hub import InferenceClient
 
-# ---------------- AWS S3 CONFIG ---------------- #
+# ---------------- AWS CONFIG ---------------- #
 
 bucket_name = "documindai-bucket-isha"
 s3 = boto3.client("s3")
 
-# ---------------- HF API CONFIG ---------------- #
+# ---------------- HF CONFIG ---------------- #
 
-client = InferenceClient(
-    model="google/flan-t5-small",
-    token=os.getenv("HF_TOKEN") 
-)
+HF_TOKEN = os.getenv("HF_TOKEN")
+
+API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-small"
+
+headers = {
+    "Authorization": f"Bearer {HF_TOKEN}"
+}
+
+def query(payload):
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.json()
 
 # ---------------- UI ---------------- #
 
 st.title("📄 DocuMind AI")
+
 uploaded_file = st.file_uploader("Upload your PDF", type="pdf")
 
 if uploaded_file:
@@ -34,6 +43,7 @@ if uploaded_file:
 
     # Upload to S3
     s3.upload_file(file_name, bucket_name, file_name)
+
     st.success(f"{file_name} uploaded to S3 successfully!")
 
     # ----------- RAG PIPELINE ----------- #
@@ -60,22 +70,21 @@ if uploaded_file:
         context = "\n".join([d.page_content for d in results])
 
         prompt = f"""
-        Answer the question using only the context below.
+Answer the question using only the context below.
 
-        Context:
-        {context}
+Context:
+{context}
 
-        Question: {question}
-        Answer:
-        """
+Question: {question}
+Answer:
+"""
 
-        response = client.text2text_generation(
-            prompt,
-            max_new_tokens=200
-        )
+        output = query({
+            "inputs": prompt,
+            "parameters": {"max_new_tokens": 200}
+        })
+
+        answer = output[0]["generated_text"]
 
         st.subheader("Answer")
-        st.write(response)
-
-
-
+        st.write(answer)
