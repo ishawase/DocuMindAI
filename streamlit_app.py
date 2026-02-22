@@ -1,12 +1,13 @@
 import streamlit as st
 import boto3
 import os
-import requests
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
+
+from huggingface_hub import InferenceClient
 
 # ---------------- AWS CONFIG ---------------- #
 
@@ -15,23 +16,10 @@ s3 = boto3.client("s3")
 
 # ---------------- HF CONFIG ---------------- #
 
-HF_TOKEN = os.getenv("HF_TOKEN")
-
-API_URL = "https://router.huggingface.co/hf-inference/models/google/flan-t5-small"
-headers = {
-    "Authorization": f"Bearer {HF_TOKEN}"
-}
-
-def query(payload):
-    response = requests.post(API_URL, headers=headers, json=payload)
-
-    if response.status_code != 200:
-        return {"error": f"HF API returned status code {response.status_code}"}
-
-    try:
-        return response.json()
-    except:
-        return {"error": "HF returned empty response (model may be loading or rate limited)"}
+client = InferenceClient(
+    model="google/flan-t5-small",
+    token=os.getenv("HF_TOKEN")
+)
 
 # ---------------- UI ---------------- #
 
@@ -49,7 +37,6 @@ if uploaded_file:
 
     # Upload to S3
     s3.upload_file(file_name, bucket_name, file_name)
-
     st.success(f"{file_name} uploaded to S3 successfully!")
 
     # ----------- RAG PIPELINE ----------- #
@@ -85,20 +72,13 @@ Question: {question}
 Answer:
 """
 
-        output = query({
-            "inputs": prompt,
-            "parameters": {"max_new_tokens": 200}
-        })
-
-        if isinstance(output, list):
-            answer = output[0].get("generated_text", "No answer generated.")
-        elif isinstance(output, dict) and "error" in output:
-            answer = f"HF API Error: {output['error']}"
-        else:
-            answer = "Unexpected response from HuggingFace API."
+        try:
+            answer = client.text2text_generation(
+                prompt,
+                max_new_tokens=200
+            )
+        except Exception as e:
+            answer = f"HF Error: {str(e)}"
 
         st.subheader("Answer")
         st.write(answer)
-
-
-
