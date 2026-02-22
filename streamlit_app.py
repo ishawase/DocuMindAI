@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import boto3
 from langchain_community.document_loaders import PyPDFLoader
@@ -15,7 +16,7 @@ s3 = boto3.client("s3")
 
 client = InferenceClient(
     model="google/flan-t5-small",
-    token="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"   
+    token=os.getenv("HF_TOKEN") 
 )
 
 # ---------------- UI ---------------- #
@@ -75,5 +76,6 @@ if uploaded_file:
 
         st.subheader("Answer")
         st.write(response)
+
 
 
