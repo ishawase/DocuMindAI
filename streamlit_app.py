@@ -24,7 +24,14 @@ headers = {
 
 def query(payload):
     response = requests.post(API_URL, headers=headers, json=payload)
-    return response.json()
+
+    if response.status_code != 200:
+        return {"error": f"HF API returned status code {response.status_code}"}
+
+    try:
+        return response.json()
+    except:
+        return {"error": "HF returned empty response (model may be loading or rate limited)"}
 
 # ---------------- UI ---------------- #
 
@@ -92,5 +99,6 @@ Answer:
 
         st.subheader("Answer")
         st.write(answer)
+
 
 
