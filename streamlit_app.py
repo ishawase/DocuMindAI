@@ -84,7 +84,13 @@ Answer:
             "parameters": {"max_new_tokens": 200}
         })
 
-        answer = output[0]["generated_text"]
+        if isinstance(output, list):
+            answer = output[0].get("generated_text", "No answer generated.")
+        elif isinstance(output, dict) and "error" in output:
+            answer = f"HF API Error: {output['error']}"
+        else:
+            answer = "Unexpected response from HuggingFace API."
 
         st.subheader("Answer")
         st.write(answer)
+
