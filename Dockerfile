@@ -11,6 +11,9 @@ RUN pip install --default-timeout=1000 \
 
 RUN pip install --default-timeout=1000 -r requirements.txt
 
+RUN pip install --upgrade "huggingface_hub>=0.23.0"
+
 EXPOSE 8501
 
 CMD ["streamlit", "run", "streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+
