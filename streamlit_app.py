@@ -68,10 +68,11 @@ if uploaded_file:
         Answer:
         """
 
-        response = client.text_generation(
+        response = client.text2text_generation(
             prompt,
             max_new_tokens=200
         )
 
         st.subheader("Answer")
         st.write(response)
+
